@@ -404,49 +404,175 @@ curl -sL "https://yourdomain.com" | grep -E "(eval|base64_decode|document\.write
 wp plugin install updraftplus --activate --allow-root
 ```
 
-**Post-cleanup verification report:**
+**IMPORTANT — Final Report Requirement:**
 
-```markdown
-## WordPress Repair Report — [DATE]
+At the end of the remediation process, you MUST generate a complete, professional incident report documenting everything that was done during this session. Do not use a generic template — fill in every field with the actual data collected and actions taken. The report must be detailed enough that another technician could understand exactly what happened and what was done without needing to ask questions.
 
-### Infection Summary
-- **Hack Type**: [redirect/pharma/backdoor/defacement/phishing]
-- **Entry Point**: [nulled plugin / outdated plugin / brute force / unknown]
-- **Scope**: [files affected, DB tables affected]
+The report must include the following sections, fully completed with real data:
 
-### Actions Taken
-- [ ] Full backup created (pre-cleanup)
-- [ ] WordPress core reinstalled
-- [ ] Malicious files removed: [list files]
-- [ ] Database cleaned: [tables/fields cleaned]
-- [ ] Unknown users removed: [list usernames]
-- [ ] All passwords rotated
-- [ ] New secret keys generated
-- [ ] All plugins/themes updated
-- [ ] Nulled software removed and replaced
-- [ ] File permissions corrected
-- [ ] .htaccess hardened
-- [ ] Security plugin installed
+---
 
-### Security Improvements
-- [ ] DISALLOW_FILE_EDIT enabled
-- [ ] XML-RPC disabled
-- [ ] PHP execution blocked in uploads/
-- [ ] Login attempts limited
-- [ ] 2FA enabled for admins
-- [ ] WAF configured
+## 🛡️ WordPress Security Incident Report
+**Site:** [domain name]
+**Date:** [date of remediation]
+**Technician:** Pulse AI WordPress Repair
+**Report generated:** [timestamp]
 
-### Blacklist Status
-- Google Safe Browsing: [clean / removal requested / pending]
-- Sucuri: [clean / detected issues]
-- Review requested: [YES/NO — date]
+---
 
-### Monitoring Setup
-- [ ] Wordfence / Sucuri active
-- [ ] Uptime monitoring configured
-- [ ] Automated backups scheduled
-- [ ] Google Search Console verified
-```
+### 1. Executive Summary
+
+Write 2–4 sentences summarizing: what happened, when it was discovered, what type of attack it was, what the impact was, and the final status of the site.
+
+---
+
+### 2. Infection Analysis
+
+- **Attack type:** [redirect hack / pharma hack / backdoor / defacement / phishing / malicious admin / cryptominer / spam mailer / other]
+- **Confirmed entry point:** [nulled plugin name / outdated plugin name and version / brute force / stolen credentials / hosting vulnerability / unknown]
+- **Estimated infection date:** [date or "unknown — oldest modified file: filename (date)"]
+- **Infection scope:**
+  - Files affected: [exact list of files found with malicious code]
+  - Database tables affected: [e.g., wp_options, wp_posts, wp_postmeta]
+  - Malware type found: [e.g., eval(base64_decode), PHP shell, JS redirect injector, SEO spam]
+- **Blacklist status at start:**
+  - Google Safe Browsing: [clean / flagged]
+  - Sucuri SiteCheck: [clean / flagged — list detections]
+  - VirusTotal: [clean / X engines flagged]
+
+---
+
+### 3. Actions Taken
+
+#### 3.1 Backup
+- Backup created: [YES / NO]
+- Backup method: [WP-CLI / cPanel / manual]
+- Backup location: [path or storage]
+- Database backup file: [filename]
+- Files backup: [filename]
+
+#### 3.2 Malicious Files Removed
+List every file that was found infected and the action taken:
+
+| File Path | Issue Found | Action |
+|-----------|-------------|--------|
+| [/path/to/file.php] | [eval(base64_decode...) / PHP shell / injected JS] | Deleted / Cleaned |
+
+#### 3.3 Database Cleanup
+List every database change made:
+
+| Table | Field | Issue | Action |
+|-------|-------|-------|--------|
+| wp_options | option_value | Malicious redirect JS in siteurl | Removed injection |
+| wp_posts | post_content | Pharma spam keywords in X posts | Cleaned content |
+
+#### 3.4 WordPress Core
+- Core reinstalled: [YES / NO]
+- Version: [e.g., 6.5.3]
+- Checksum verification result: [PASSED / FAILED — list any failed files]
+
+#### 3.5 Users
+- Unknown/malicious admin users removed: [list usernames and IDs]
+- All admin passwords reset: [YES / NO]
+- Users with suspicious activity: [list or "none found"]
+
+#### 3.6 Plugins & Themes
+- Plugins deactivated for diagnosis: [YES / NO]
+- Plugins reinstalled from official source: [list]
+- Plugins deleted (unused or nulled): [list]
+- Themes deleted (unused): [list]
+- Nulled/pirated software found: [YES — list / NO]
+- All plugins updated: [YES / NO — list any that could not be updated]
+- All themes updated: [YES / NO]
+
+#### 3.7 Credentials Rotated
+- [ ] WordPress admin password(s)
+- [ ] Database password
+- [ ] FTP / hosting password
+- [ ] cPanel password
+- [ ] WordPress secret keys (wp-config.php)
+- [ ] Email account passwords
+
+---
+
+### 4. Security Hardening Applied
+
+| Measure | Applied | Notes |
+|---------|---------|-------|
+| DISALLOW_FILE_EDIT in wp-config.php | ✅ / ❌ | |
+| New WordPress secret keys | ✅ / ❌ | |
+| File permissions corrected (755/644/600) | ✅ / ❌ | |
+| .htaccess hardened | ✅ / ❌ | Rules added: [list] |
+| XML-RPC disabled | ✅ / ❌ | |
+| PHP execution blocked in uploads/ | ✅ / ❌ | |
+| Login attempts limited | ✅ / ❌ | Plugin used: [name] |
+| Security plugin installed/activated | ✅ / ❌ | Plugin: [Wordfence / Sucuri / other] |
+| WAF (Web Application Firewall) | ✅ / ❌ | [Cloudflare / Wordfence / none] |
+| wp-login.php URL changed | ✅ / ❌ | |
+| 2FA enabled for admins | ✅ / ❌ | |
+| Automatic updates enabled | ✅ / ❌ | |
+
+---
+
+### 5. Final Verification
+
+- Final malware scan result: [CLEAN / issues found — list]
+- Core checksum verification: [PASSED / issues — list]
+- Site loads correctly: [YES / NO]
+- No redirect code detected: [YES / NO]
+- No PHP files in uploads/: [YES / NO]
+
+---
+
+### 6. Blacklist & Recovery Status
+
+- Google Safe Browsing: [clean / removal requested on DATE / still flagged]
+- Sucuri SiteCheck: [clean / still flagged]
+- Google Search Console review requested: [YES — DATE / NO / not needed]
+- Estimated recovery time from Google: [1–3 business days / already clean]
+
+---
+
+### 7. Monitoring & Maintenance Setup
+
+- [ ] Security plugin active with email alerts
+- [ ] Uptime monitoring configured: [UptimeRobot / other / not set]
+- [ ] Automated backups scheduled: [UpdraftPlus daily/weekly / other / not set]
+- [ ] Google Search Console verified and monitored
+- [ ] Next recommended manual audit: [DATE — 30 days from now]
+
+---
+
+### 8. Root Cause & Recommendations
+
+**Root cause:** [Describe exactly how the attacker got in — be specific]
+
+**Immediate recommendations:**
+1. [Most critical action the client must take]
+2. [Second priority]
+3. [Third priority]
+
+**Long-term recommendations:**
+- [e.g., Consider managed WordPress hosting with built-in WAF]
+- [e.g., Implement a staging environment to test plugin updates before going live]
+- [e.g., Schedule quarterly security audits]
+
+---
+
+### 9. Incident Timeline
+
+| Time | Event |
+|------|-------|
+| [DATE] | Infection estimated to have started |
+| [DATE] | Hack discovered |
+| [DATE] | Remediation started |
+| [DATE] | Site taken to maintenance mode |
+| [DATE] | Malware removed |
+| [DATE] | Site back online |
+| [DATE] | Google review requested (if applicable) |
+
+---
+*Report generated by Pulse AI WordPress Repair Skill — https://github.com/maomur/pulse-ai-wordpress-repair*
 
 ---
 

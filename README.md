@@ -129,6 +129,29 @@ wp maintenance-mode activate   # Activar modo mantenimiento
 
 ---
 
+## Informe final de incidente
+
+Al terminar la remediación, la skill genera automáticamente un **informe profesional completo** con todos los detalles reales de la sesión:
+
+| Sección | Contenido |
+|---------|-----------|
+| **Resumen ejecutivo** | Qué pasó, cuándo, tipo de ataque, impacto y estado final |
+| **Análisis de infección** | Tipo de ataque, punto de entrada, archivos y tablas afectadas, estado en listas negras |
+| **Archivos eliminados** | Tabla con ruta, tipo de malware encontrado y acción tomada |
+| **Limpieza de base de datos** | Tabla con cambios realizados por tabla y campo |
+| **Usuarios** | Usuarios maliciosos eliminados, contraseñas rotadas |
+| **Plugins y temas** | Lista de reinstalados, eliminados, actualizados, nulled encontrado |
+| **Credenciales rotadas** | Checklist de todas las contraseñas cambiadas |
+| **Endurecimiento aplicado** | Tabla con cada medida de seguridad y su estado |
+| **Verificación final** | Resultado del re-escaneo, checksums, test de carga |
+| **Estado en listas negras** | Google Safe Browsing, Sucuri, fecha de solicitud de remoción |
+| **Causa raíz** | Análisis del punto de entrada y recomendaciones específicas |
+| **Línea de tiempo** | Cronología completa del incidente y la remediación |
+
+El informe es lo suficientemente detallado para que otro técnico entienda exactamente qué ocurrió y qué se hizo, sin necesidad de preguntas adicionales.
+
+---
+
 ## Checklists incluidas
 
 - Pre-limpieza (backup y evaluación)
