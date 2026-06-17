@@ -1,0 +1,15 @@
+# Client data, evidence, and cleaned sites — NEVER commit.
+# These contain real customer data, password hashes, and live malware, and are huge.
+Infectados/
+Curado/
+*.sql
+*.sql.gz
+
+# Per-incident generated reports (may contain client data)
+incident-report-*.html
+report-*-EN.html
+!incident-report-ejemplo.html
+
+# Local / editor cruft
+.DS_Store
+.vscode/

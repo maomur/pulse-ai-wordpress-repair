@@ -8,32 +8,53 @@
 
 Esta skill convierte a Claude (u otro agente compatible) en un especialista en recuperación de sitios WordPress comprometidos. Cubre el proceso completo de remediación: desde la evaluación inicial del ataque hasta el endurecimiento post-limpieza y la solicitud de eliminación de listas negras.
 
+**Flujo de uso:** le indicas al agente el **directorio infectado** de WordPress (y el dominio) y, opcionalmente, un **volcado de la base de datos** (`.sql` o `.sql.gz`); el agente **analiza los archivos y la base de datos**, aplica las correcciones y al final genera un **dashboard HTML autónomo** (un solo archivo, se abre con doble clic, sin internet) con **dos vistas**:
+
+- **👤 Modo simple** — explicación clara para un usuario sin conocimientos técnicos (qué pasó, qué se hizo, qué debe hacer).
+- **🔧 Modo técnico** — rutas exactas, tablas, comandos, CVEs y resultados de verificación.
+
+El dashboard se imprime a PDF desde el navegador. La plantilla está en [`dashboard-template.html`](dashboard-template.html).
+
 ### Tipos de ataques que cubre
 
 | Tipo de ataque | Síntomas |
 |----------------|----------|
-| **Redirect Hack** | Visitantes redirigidos a sitios de spam, farmacia o contenido adulto |
-| **Pharma Hack** | Google muestra palabras clave de medicamentos en los resultados |
+| **Redirect Hack** | Visitantes redirigidos a sitios de spam, farmacia o contenido adulto (a menudo solo en móvil o para Googlebot) |
+| **Pharma / SEO Spam** | Google muestra palabras clave de medicamentos/casino en los resultados |
 | **Backdoor** | El atacante recupera acceso después de cada limpieza |
 | **Defacement** | La página de inicio fue reemplazada por el atacante |
 | **Phishing** | Tu sitio sirve páginas falsas de inicio de sesión |
 | **Admin Malicioso** | Usuarios administradores desconocidos en wp-admin |
 | **Cryptominer** | CPU del servidor al 100%, sitio lento |
 | **Spam Mailer** | Servidor en listas negras por envío de spam |
+| **Supply-chain** | Muchos sitios infectados a la vez tras actualizar un plugin comprometido/vendido |
+
+### Contexto de amenazas 2025–2026 (en qué se basa la skill)
+
+- **Los plugins son la puerta de entrada nº1**: ~91% de las vulnerabilidades nuevas están en plugins, no en el core.
+- **Explotación en ~5 horas**: ese es el tiempo medio entre que se publica una vulnerabilidad y su explotación activa. Un plugin desactualizado es un riesgo inmediato.
+- **Persistencia moderna**: los backdoors ya no viven solo en `uploads/`. La skill busca también en `mu-plugins/`, *drop-ins* (`object-cache.php`, `db.php`…), tareas **WP-Cron** maliciosas, inyecciones en `wp-config.php`, `auto_prepend_file` y admins/contraseñas de aplicación ocultos.
+- **La base de datos es un objetivo de primera**: `wp_options` es el escondite nº1 (blobs base64 bajo nombres hexadecimales, abuso de `autoload`, *transients* y `cron` con payloads), además de spam SEO en `wp_posts`, admins ocultos en `wp_usermeta` y PHP guardado por plugins de snippets. La skill analiza la BD en vivo **o un volcado `.sql` independiente**, y edita datos serializados de forma segura (`wp search-replace`, no `REPLACE()` a ciegas).
+- **Ataques de cadena de suministro**: plugins legítimos que son vendidos o hackeados y distribuyen malware en una actualización rutinaria.
+- **Una actualización NO es una limpieza**: parchear cierra el agujero pero no elimina el código ya inyectado.
 
 ---
 
 ## Flujo de trabajo — 7 pasos
 
 ```
-Paso 1 → Evaluación inicial         Identificar tipo de hack, verificar listas negras
-Paso 2 → Backup & Aislamiento       Backup completo, modo mantenimiento, rotar credenciales
-Paso 3 → Escaneo de malware         WP-CLI checksums, archivos PHP sospechosos, base de datos
-Paso 4 → Limpieza                   Reinstalar core, eliminar archivos y código malicioso
-Paso 5 → Auditoría de plugins       Desactivar, reinstalar desde fuentes oficiales, actualizar
-Paso 6 → Endurecimiento             Permisos, secret keys, deshabilitar XML-RPC, WAF
-Paso 7 → Verificación y monitoreo   Re-escanear, test final, solicitar remoción de blacklist
+Paso 0 → Triaje y autorización      Confirmar permiso/acceso, ruta de WordPress, WP-CLI
+Paso 1 → Evaluación inicial         Tipo de hack, listas negras, WPScan, punto de entrada
+Paso 2 → Backup & Aislamiento       Backup forense, modo mantenimiento, rotar credenciales y salts
+Paso 3 → Escaneo de malware         Checksums, mu-plugins, drop-ins, cron, wp-config, admins falsos
+Paso 3B→ Forense de base de datos    Analiza dump .sql o BD en vivo: wp_options/autoload, cron, transients, usuarios ocultos, spam
+Paso 4 → Limpieza                   Reinstalar core, eliminar malware Y mecanismos de persistencia
+Paso 5 → Auditoría de plugins       Cerrar el punto de entrada: reinstalar, actualizar, virtual patching
+Paso 6 → Endurecimiento             Permisos, salts, XML-RPC, REST API, registro, 2FA, WAF
+Paso 7 → Verificación y monitoreo   Re-escanear, test (Googlebot), blacklist, re-escaneo a +30 días
 ```
+
+> **Regla de oro:** si el sitio se reinfecta, quedó un mecanismo de persistencia. La limpieza no termina hasta que el sitio sobrevive **30 días** sin reinfectarse.
 
 ---
 
@@ -107,10 +128,12 @@ También puedes invocarla directamente:
 La skill guía al agente para usar las siguientes herramientas durante la remediación:
 
 - **WP-CLI** — Gestión de WordPress desde línea de comandos
-- **find / grep** — Búsqueda de archivos y patrones maliciosos
-- **curl** — Verificación del estado del sitio
+- **WPScan** — Detección de versiones y vulnerabilidades conocidas (CVE)
+- **find / grep** — Búsqueda de archivos y patrones maliciosos (incluyendo ofuscación)
+- **curl** — Verificación del estado del sitio (incluido test con user-agent de Googlebot para detectar redirects encubiertos)
+- **diff** — Comparación contra copias limpias conocidas
 - **git** — Control de versiones para rastrear cambios
-- Escaners externos: **Sucuri SiteCheck**, **Google Safe Browsing**, **VirusTotal**
+- Escáners y bases de datos externas: **Sucuri SiteCheck**, **Google Safe Browsing**, **VirusTotal**, **WPScan DB**, **Patchstack**, **Wordfence Threat Intel**
 
 ---
 
@@ -177,8 +200,9 @@ El informe es lo suficientemente detallado para que otro técnico entienda exact
 
 ```
 pulse-ai-wordpress-repair/
-├── SKILL.md       # Skill principal (flujo completo de remediación)
-└── README.md      # Este archivo
+├── SKILL.md                 # Skill principal (flujo completo de remediación)
+├── dashboard-template.html  # Plantilla del dashboard de reporte (modo simple + técnico)
+└── README.md                # Este archivo
 ```
 
 ---
